@@ -1,3 +1,4 @@
+<img width="2826" height="1468" alt="Admin Portal" src="https://github.com/user-attachments/assets/1c875ad6-b2d3-4765-b254-d6a1cff37e73" />
 # 🏥 Hospital Operations AI Assistant
 
 An AI-powered healthcare analytics platform that transforms hospital operational CSV data into executive dashboards, AI-generated insights, operational risk detection, and actionable recommendations for hospital executives.
@@ -98,7 +99,8 @@ Hospital CSV Files
 
 Upload and validate multiple hospital operational CSV datasets before publishing to the executive dashboard.
 
-![Admin Portal](screenshots/admin_portal.png)
+<img width="2826" height="1468" alt="Admin Portal" src="https://github.com/user-attachments/assets/9f734062-63c2-4809-9ebd-82f866c6bbea" />
+
 
 ---
 
@@ -106,7 +108,7 @@ Upload and validate multiple hospital operational CSV datasets before publishing
 
 The AI agent generates executive summaries, detects operational risks, and provides recommendations for hospital leadership.
 
-![AI Executive Summary](screenshots/ai_executive_summary.png)
+<img width="2766" height="1442" alt="AI Executive Summary" src="https://github.com/user-attachments/assets/f43b588c-3264-4360-b7df-42cb827dbeee" />
 
 ---
 
@@ -114,7 +116,8 @@ The AI agent generates executive summaries, detects operational risks, and provi
 
 Monitor hospital KPIs, patient demographics, staffing levels, department performance, and operational metrics.
 
-![Dashboard Overview](screenshots/dashboard_overview.png)
+<img width="2810" height="1452" alt="Dashboard Overview" src="https://github.com/user-attachments/assets/7518f5a7-89c8-401f-a891-7ed1faf0c55b" />
+
 
 ---
 
@@ -122,7 +125,7 @@ Monitor hospital KPIs, patient demographics, staffing levels, department perform
 
 Analyze department performance, patient satisfaction, length of stay, and monthly operational trends.
 
-![Operational Analytics](screenshots/operational_analytics.png)
+<img width="2774" height="1448" alt="Operational Analytics" src="https://github.com/user-attachments/assets/09467fd7-eedc-4f66-b4a6-d3447b4bee69" />
 
 
 # 👩‍💻 Author
