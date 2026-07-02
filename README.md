@@ -1,4 +1,3 @@
-<img width="2826" height="1468" alt="Admin Portal" src="https://github.com/user-attachments/assets/1c875ad6-b2d3-4765-b254-d6a1cff37e73" />
 # 🏥 Hospital Operations AI Assistant
 
 An AI-powered healthcare analytics platform that transforms hospital operational CSV data into executive dashboards, AI-generated insights, operational risk detection, and actionable recommendations for hospital executives.
