@@ -68,18 +68,25 @@ Provides the operational upload panel to drag-and-drop clinical CSV files, run s
 
 ---
 
-# 🛠 Technologies
+## 🛠 Technologies
 
+### AI & Development
 - Google AI Studio
 - Gemini
 - Google Agent Development Kit (ADK)
+
+### Frontend
 - TypeScript
 - React
 - Vite
 - HTML5
 - CSS3
-- Interactive Dashboard
+
+### Data & Analytics
 - CSV Data Processing
+- Interactive Dashboard
+- Healthcare Analytics
+
 
 ---
 
