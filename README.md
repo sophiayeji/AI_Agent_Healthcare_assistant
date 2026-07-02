@@ -98,7 +98,7 @@ Hospital CSV Files
 
 Upload and validate multiple hospital operational CSV datasets before publishing to the executive dashboard.
 
-![Admin Portal](screenshots/Admin%20Portal.png)
+![Admin Portal](screenshots/admin_portal.png)
 
 ---
 
@@ -106,7 +106,7 @@ Upload and validate multiple hospital operational CSV datasets before publishing
 
 The AI agent generates executive summaries, detects operational risks, and provides recommendations for hospital leadership.
 
-![AI Executive Summary](screenshots/AI%20Executive%20Summary.png)
+![AI Executive Summary](screenshots/ai_executive_summary.png)
 
 ---
 
@@ -114,7 +114,7 @@ The AI agent generates executive summaries, detects operational risks, and provi
 
 Monitor hospital KPIs, patient demographics, staffing levels, department performance, and operational metrics.
 
-![Dashboard Overview](screenshots/Dashboard%20Overview.png)
+![Dashboard Overview](screenshots/dashboard_overview.png)
 
 ---
 
@@ -122,7 +122,7 @@ Monitor hospital KPIs, patient demographics, staffing levels, department perform
 
 Analyze department performance, patient satisfaction, length of stay, and monthly operational trends.
 
-![Operational Analytics](screenshots/Operational%20Analytics.png)
+![Operational Analytics](screenshots/operational_analytics.png)
 
 
 # 👩‍💻 Author
