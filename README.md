@@ -124,19 +124,6 @@ Analyze department performance, patient satisfaction, length of stay, and monthl
 
 ![Operational Analytics](screenshots/Operational%20Analytics.png)
 
----
-
-# 💡 Future Improvements
-
-- Power BI Integration
-- Real-time Database Connectivity
-- Predictive Analytics
-- Forecasting Models
-- Automated Email Alerts
-- Role-based Authentication
-- Cloud Database Support
-
----
 
 # 👩‍💻 Author
 
