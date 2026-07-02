@@ -169,6 +169,19 @@ The walkthrough demonstrates:
 
 ---
 
+## 📁 Dataset
+
+This application uses the **Hospital Beds Management** dataset from Kaggle as its reference dataset.
+
+The AI Assistant is designed to process CSV files that follow the same data schema, automatically generating executive dashboards, operational KPIs, AI summaries, red flags, and recommendations for hospital decision-makers.
+
+**Dataset:**  
+https://www.kaggle.com/datasets/jaderz/hospital-beds-management
+
+> **Note:** The dataset contains synthetic healthcare data for educational and demonstration purposes.
+
+---
+
 # 👩‍💻 Author
 
 **Yeji Son**
