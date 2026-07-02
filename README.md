@@ -4,6 +4,8 @@ An AI-powered healthcare analytics platform that transforms hospital operational
 
 Built with Google AI Studio, Gemini, Google Agent Development Kit (ADK), TypeScript, React, and Vite, this application demonstrates how AI agents can support healthcare operations and executive decision-making.
 
+Target Users: Hospital executives, operations managers, and healthcare administrators.
+
 ---
 
 # 🚀 Features
