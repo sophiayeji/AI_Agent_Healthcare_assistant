@@ -2,7 +2,7 @@
 
 An AI-powered healthcare analytics platform that transforms hospital operational CSV data into executive dashboards, AI-generated insights, operational risk detection, and actionable recommendations for hospital executives.
 
-Built with **Google AI Studio, Gemini, Google Agent Development Kit (ADK), and Python**, this application demonstrates how AI agents can support healthcare operations and executive decision-making.
+Built with Google AI Studio, Gemini, Google Agent Development Kit (ADK), TypeScript, React, and Vite, this application demonstrates how AI agents can support healthcare operations and executive decision-making.
 
 ---
 
