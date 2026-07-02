@@ -1,0 +1,169 @@
+import React, { useState } from "react";
+import { 
+  Send, 
+  RotateCcw, 
+  Eye, 
+  Settings, 
+  Lock, 
+  CheckCircle, 
+  AlertCircle,
+  FileSpreadsheet,
+  ArrowRight
+} from "lucide-react";
+import { DashboardData } from "../types";
+import CsvUploader from "./CsvUploader";
+import ExecutiveDashboard from "./ExecutiveDashboard";
+
+interface AdminPanelProps {
+  draftState: DashboardData;
+  setDraftState: React.Dispatch<React.SetStateAction<DashboardData>>;
+  onPublish: (publishedData: DashboardData) => Promise<void>;
+  onReset: () => Promise<void>;
+  onNotify: (msg: string, type: "success" | "error" | "info") => void;
+  publishing: boolean;
+}
+
+export default function AdminPanel({ 
+  draftState, 
+  setDraftState, 
+  onPublish, 
+  onReset, 
+  onNotify,
+  publishing 
+}: AdminPanelProps) {
+  const [showPreview, setShowPreview] = useState(true);
+
+  const handlePublishClick = async () => {
+    onNotify("Publishing sandbox data to Customer Dashboard...", "info");
+    await onPublish(draftState);
+  };
+
+  return (
+    <div className="space-y-8" id="admin-panel-module">
+      {/* Admin Disclaimer / Guide Banner */}
+      <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200/60 shadow-sm flex flex-col md:flex-row items-start gap-4">
+        <div className="p-2 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+          <Settings size={20} className="animate-spin-slow" />
+        </div>
+        <div className="space-y-1.5 flex-1">
+          <h3 className="font-bold text-amber-900 text-sm md:text-base flex items-center gap-1.5">
+            <span>Hospital Admin Sandboxed Workspace</span>
+            <span className="text-[10px] font-mono font-semibold uppercase bg-amber-200/50 text-amber-800 py-0.5 px-2 rounded-full border border-amber-200">
+              Draft Mode
+            </span>
+          </h3>
+          <p className="text-xs text-amber-800 leading-relaxed">
+            Welcome to the secure administrative feed. Here, you can compile, ingest, and audit multi-file CSV datasets before pushing them live to hospital leadership. 
+            All changes remain sandboxed within this workspace until you click <strong>Publish to Executive Dashboard</strong> below, which instantly commits these metrics and logs the transaction.
+          </p>
+        </div>
+      </div>
+
+      {/* Grid of Uploader and Quick Actions */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        
+        {/* CSV Ingestion center */}
+        <div className="xl:col-span-8">
+          <CsvUploader 
+            draftState={draftState} 
+            setDraftState={setDraftState} 
+            onNotify={onNotify} 
+          />
+        </div>
+
+        {/* Administrative Console / Publishing Desk */}
+        <div className="xl:col-span-4 flex flex-col bg-white rounded-2xl p-6 border border-slate-100 shadow-sm justify-between gap-6">
+          <div className="space-y-4">
+            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider border-b border-slate-100 pb-2.5 flex items-center gap-2">
+              <Lock size={14} className="text-slate-500" />
+              <span>Publishing desk</span>
+            </h3>
+
+            <div className="space-y-3">
+              <p className="text-xs text-slate-600 leading-normal">
+                Audited your files? Commit your current working sandbox configuration to the client view instantly. This updates the public database and refreshes executive charts.
+              </p>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Session Summary</span>
+                <div className="flex justify-between text-xs text-slate-700">
+                  <span>Specialty Beds Count:</span>
+                  <strong className="font-mono">{draftState.patientDemographics.serviceTypes.length} lines</strong>
+                </div>
+                <div className="flex justify-between text-xs text-slate-700">
+                  <span>Current Scope Duration:</span>
+                  <strong className="font-semibold">{draftState.period}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2.5 pt-4 border-t border-slate-100">
+            {/* Publish Button */}
+            <button
+              onClick={handlePublishClick}
+              disabled={publishing}
+              className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md hover:shadow-lg hover:shadow-blue-600/10 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <Send size={14} className={publishing ? "animate-pulse" : ""} />
+              <span>{publishing ? "Committing and Publishing..." : "Publish to Executive Dashboard"}</span>
+            </button>
+
+            {/* Reset Button */}
+            <button
+              onClick={async () => {
+                const conf = window.confirm("Are you sure you want to reset your sandbox to default high-fidelity hospital data? All unpublished CSV changes will be overwritten.");
+                if (conf) {
+                  onNotify("Resetting sandbox to standard hospital baseline...", "info");
+                  await onReset();
+                }
+              }}
+              className="w-full py-2 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+            >
+              <RotateCcw size={13} />
+              <span>Reset Sandbox to Default</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Expandable Draft Preview Dashboard section */}
+      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200/50">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Eye size={18} className="text-blue-500" />
+            <h3 className="font-bold text-slate-800 text-base">Sandboxed Draft Preview</h3>
+            <span className="text-[10px] bg-slate-200/80 text-slate-700 font-semibold py-0.5 px-2 rounded-full">Fully Live In-Memory Draft</span>
+          </div>
+          
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            className="text-xs text-blue-600 hover:text-blue-700 font-semibold"
+          >
+            {showPreview ? "Hide Preview Desk" : "Show Preview Desk"}
+          </button>
+        </div>
+
+        {showPreview ? (
+          <div className="border border-slate-200/60 rounded-xl p-6 bg-white shadow-inner">
+            <div className="mb-4 flex items-center gap-2 bg-amber-50 text-amber-800 p-3 rounded-lg text-xs border border-amber-100">
+              <AlertCircle size={14} className="shrink-0" />
+              <span>This dashboard displays your currently uploaded sandbox data. Executive leaders and general users will NOT see these changes until you hit the <strong>Publish to Executive Dashboard</strong> button above.</span>
+            </div>
+            
+            <ExecutiveDashboard 
+              data={draftState} 
+              onNotify={onNotify} 
+              isAdminPreview={true} 
+            />
+          </div>
+        ) : (
+          <div className="text-center p-8 text-slate-400 text-xs bg-white rounded-xl border border-slate-200">
+            Preview hidden. Toggle using the button on the right to inspect current sandbox layout.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
