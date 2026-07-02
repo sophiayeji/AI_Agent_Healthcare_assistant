@@ -1,0 +1,296 @@
+import React, { useState, useEffect } from "react";
+import { 
+  Sparkles, 
+  AlertTriangle, 
+  HelpCircle, 
+  CheckCircle2, 
+  TrendingUp, 
+  RefreshCw, 
+  Activity,
+  Bot
+} from "lucide-react";
+import { AIAnalysis, DashboardData } from "../types";
+
+interface AIAnalystReportProps {
+  dashboardData: DashboardData;
+  selectedMonth: string; // "YTD" or specific month like "January", "May"
+  onNotify: (msg: string, type: "success" | "error" | "info") => void;
+}
+
+export default function AIAnalystReport({ dashboardData, selectedMonth, onNotify }: AIAnalystReportProps) {
+  const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isFallback, setIsFallback] = useState(false);
+
+  // Helper to format MM/DD/YY to nice readable string
+  const formatPeriodDates = (pStr: string) => {
+    if (!pStr) return pStr;
+    const normalized = pStr.replace(/[–—]/g, "-");
+    const match = normalized.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s*-\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if (match) {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const startM = monthNames[parseInt(match[1]) - 1] || "Jan";
+      const startD = parseInt(match[2]);
+      const startY = match[3].length === 2 ? `20${match[3]}` : match[3];
+      
+      const endM = monthNames[parseInt(match[4]) - 1] || "Dec";
+      const endD = parseInt(match[5]);
+      const endY = match[6].length === 2 ? `20${match[6]}` : match[6];
+      
+      return `${startM} ${startD}, ${startY} – ${endM} ${endD}, ${endY}`;
+    }
+    return pStr;
+  };
+
+  // Helper to detect dynamic year
+  const getDetectedYear = (pStr: string) => {
+    if (!pStr) return "2026";
+    const normalized = pStr.replace(/[–—]/g, "-");
+    const match = normalized.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s*-\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+    if (match) {
+      const endY = match[6];
+      return endY.length === 2 ? `20${endY}` : endY;
+    }
+    const yearMatch = pStr.match(/\b(202\d|201\d)\b/);
+    if (yearMatch) return yearMatch[1];
+    return "2026";
+  };
+
+  const displayYear = getDetectedYear(dashboardData.period);
+
+  // Derive relevant metrics to send to the AI
+  const getPeriodMetricsSummary = () => {
+    if (selectedMonth === "YTD") {
+      // Calculate YTD averages across monthly trends and departments
+      const totalRequests = dashboardData.monthlyTrends.reduce((sum, t) => sum + t.patientRequests, 0);
+      const totalAdmissions = dashboardData.monthlyTrends.reduce((sum, t) => sum + t.admissions, 0);
+      const avgAvailability = dashboardData.monthlyTrends.reduce((sum, t) => sum + t.serviceAvailability, 0) / dashboardData.monthlyTrends.length;
+      const avgLOS = dashboardData.lengthOfStaySatisfaction.reduce((sum, l) => sum + l.averageLOS, 0) / dashboardData.lengthOfStaySatisfaction.length;
+      const avgSatisfaction = dashboardData.lengthOfStaySatisfaction.reduce((sum, l) => sum + l.averageSatisfaction, 0) / dashboardData.lengthOfStaySatisfaction.length;
+      
+      return {
+        period: `Year-To-Date (${formatPeriodDates(dashboardData.period)})`,
+        patientRequestsYTD: totalRequests,
+        admissionsYTD: totalAdmissions,
+        averageServiceAvailabilityYTD: Math.round(avgAvailability),
+        averageLengthOfStayDaysYTD: parseFloat(avgLOS.toFixed(1)),
+        averageSatisfactionYTD: parseFloat(avgSatisfaction.toFixed(1)),
+        staffing: dashboardData.staffData.map(s => ({
+          department: s.department,
+          staffCount: s.staffCount,
+          presenceRatePercent: s.presenceRate
+        })),
+        departments: dashboardData.departmentPerformance.map(dp => {
+          const losItem = dashboardData.lengthOfStaySatisfaction.find(l => l.serviceType === dp.department);
+          return {
+            department: dp.department,
+            requestToAdmissionRatePercent: dp.requestToAdmissionRate,
+            serviceAvailabilityPercent: dp.serviceAvailability,
+            satisfactionScore: dp.satisfactionScore,
+            averageLengthOfStayDays: losItem ? losItem.averageLOS : 0
+          };
+        })
+      };
+    } else {
+      // Fetch specific month's trend data
+      const monthData = dashboardData.monthlyTrends.find(t => t.month.toLowerCase() === selectedMonth.toLowerCase());
+      if (!monthData) return null;
+
+      return {
+        period: `${selectedMonth} ${displayYear}`,
+        patientRequests: monthData.patientRequests,
+        admissions: monthData.admissions,
+        requestToAdmissionRatePercent: monthData.requestToAdmissionRate,
+        serviceAvailabilityPercent: monthData.serviceAvailability,
+        averageLengthOfStayDays: monthData.averageLOS,
+        averageSatisfaction: monthData.averageSatisfaction,
+        dischargeTrendCount: monthData.dischargeTrend,
+        readmissionRatePercent: monthData.readmissionRate,
+        staffing: dashboardData.staffData.map(s => ({
+          department: s.department,
+          staffCount: s.staffCount,
+          presenceRatePercent: s.presenceRate
+        })),
+        departments: dashboardData.departmentPerformance.map(dp => {
+          const losItem = dashboardData.lengthOfStaySatisfaction.find(l => l.serviceType === dp.department);
+          return {
+            department: dp.department,
+            requestToAdmissionRatePercent: dp.requestToAdmissionRate,
+            serviceAvailabilityPercent: dp.serviceAvailability,
+            satisfactionScore: dp.satisfactionScore,
+            averageLengthOfStayDays: losItem ? losItem.averageLOS : 0
+          };
+        })
+      };
+    }
+  };
+
+  const fetchAIAnalysis = async () => {
+    setLoading(true);
+    const summaryMetrics = getPeriodMetricsSummary();
+    
+    if (!summaryMetrics) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          metrics: summaryMetrics,
+          periodName: selectedMonth === "YTD" ? "Year-to-Date" : selectedMonth
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Analysis endpoint failed");
+      }
+
+      const data = await response.json();
+      setAnalysis(data.analysis);
+      setIsFallback(data.isFallback);
+    } catch (err: any) {
+      console.error("AI fetch failed:", err);
+      onNotify("Failed to fetch AI analysis. Using offline consultant models.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Re-fetch when the selected period changes
+  useEffect(() => {
+    fetchAIAnalysis();
+  }, [selectedMonth, dashboardData.lastUpdated]);
+
+  return (
+    <div className="bg-white text-[#1A1F36] rounded-xl shadow-sm border border-[#E3E8EE] overflow-hidden" id="ai-analyst-panel">
+      {/* Header */}
+      <div className="border-b border-[#E3E8EE] bg-[#F7FAFC] px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 bg-[#10B981] rounded-full animate-pulse" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-[#1A1F36] tracking-tight text-sm uppercase">AI Executive Summary</h3>
+              <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 py-0.5 px-2 rounded-full border border-indigo-100">
+                Active Analyst
+              </span>
+            </div>
+            <p className="text-xs text-[#697386]">
+              Focus Period: <strong className="text-[#1A1F36]">{selectedMonth === "YTD" ? `YTD cumulative (${formatPeriodDates(dashboardData.period)})` : `${selectedMonth} ${displayYear}`}</strong>
+            </p>
+          </div>
+        </div>
+        
+        <button
+          onClick={fetchAIAnalysis}
+          disabled={loading}
+          className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#4F46E5] hover:bg-[#3730A3] text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
+        >
+          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+          <span>{loading ? "Analyzing..." : "Re-Analyze"}</span>
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="p-12 flex flex-col items-center justify-center gap-4 text-center bg-white">
+          <div className="relative">
+            <div className="w-10 h-10 border-4 border-indigo-100 border-t-[#4F46E5] rounded-full animate-spin" />
+            <Sparkles size={16} className="text-[#4F46E5] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-[#1A1F36] uppercase tracking-wider">Reviewing operations metrics...</p>
+            <p className="text-xs text-[#697386] mt-1 max-w-md">
+              Evaluating patient admissions, staffing presence rates, specialty clinic availability, average LOS, and satisfaction levels.
+            </p>
+          </div>
+        </div>
+      ) : analysis ? (
+        <div className="p-6 space-y-6 bg-white">
+          {/* Executive Summary */}
+          <div className="bg-[#F7FAFC] p-5 rounded-lg border border-[#E3E8EE]">
+            <p className="text-sm text-[#4A5568] leading-relaxed font-sans font-normal">
+              {analysis.executiveSummary}
+            </p>
+          </div>
+
+          {/* Red Flags and Causes Group */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Red Flags */}
+            <div className="bg-[#FEE2E2] p-5 rounded-lg border border-[#FEE2E2] text-[#991B1B]">
+              <h4 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-3">
+                <AlertTriangle size={14} />
+                <span>Operational Red Flags</span>
+              </h4>
+              <ul className="space-y-2.5">
+                {analysis.redFlags.map((flag, idx) => (
+                  <li key={`flag-${idx}`} className="flex items-start gap-2 text-xs text-[#991B1B] font-medium">
+                    <span className="w-1.5 h-1.5 bg-[#991B1B] rounded-full mt-1.5 shrink-0" />
+                    <span className="leading-normal">{flag}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Possible Causes */}
+            <div className="bg-[#FFFDF5] p-5 rounded-lg border border-[#FEF3C7] text-[#92400E]">
+              <h4 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-3">
+                <HelpCircle size={14} />
+                <span>Underlying Bottlenecks</span>
+              </h4>
+              <ul className="space-y-2.5">
+                {analysis.possibleCauses.map((cause, idx) => (
+                  <li key={`cause-${idx}`} className="flex items-start gap-2 text-xs text-[#92400E] font-medium">
+                    <span className="w-1.5 h-1.5 bg-[#D97706] rounded-full mt-1.5 shrink-0" />
+                    <span className="leading-normal">{cause}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Recommendations */}
+          <div className="bg-[#F0F9FF] border border-[#BAE6FD] p-5 rounded-lg text-[#0369A1]">
+            <h4 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-3 text-[#0369A1]">
+              <CheckCircle2 size={14} />
+              <span>Recommended Actions</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {analysis.recommendations.map((rec, idx) => (
+                <div key={`rec-${idx}`} className="bg-white/80 p-3 rounded-md border border-[#BAE6FD]/60 flex gap-2.5">
+                  <div className="w-5 h-5 bg-[#0369A1] text-white rounded-full flex items-center justify-center shrink-0 font-bold text-[10px] mt-0.5">
+                    {idx + 1}
+                  </div>
+                  <p className="text-xs text-[#0369A1] leading-normal font-medium">{rec}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Key Issues & Differences for this month */}
+          <div className="bg-[#F7FAFC] p-5 rounded-lg border border-[#E3E8EE]">
+            <h4 className="text-xs font-bold text-[#1A1F36] uppercase tracking-widest flex items-center gap-2 mb-2">
+              <TrendingUp size={14} className="text-[#4F46E5]" />
+              <span>Key Issues & Monthly Divergence</span>
+            </h4>
+            <p className="text-xs text-[#697386] leading-relaxed font-sans">
+              {analysis.keyIssuesMonthly}
+            </p>
+          </div>
+
+          {/* Live vs Fallback indicator */}
+          {isFallback && (
+            <div className="text-[9px] text-[#A3AED0] text-center pt-2 border-t border-[#E3E8EE] font-mono">
+              Note: App is running in offline analyst mode. To enable dynamic generative Gemini insights, declare a valid <code className="bg-[#F7FAFC] px-1 py-0.5 border border-[#E3E8EE] text-[#697386] rounded">GEMINI_API_KEY</code> inside Settings &bull; Secrets.
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="p-6 text-center text-[#697386] text-xs">
+          No analysis available. Click "Re-Analyze" to generate a report.
+        </div>
+      )}
+    </div>
+  );
+}
