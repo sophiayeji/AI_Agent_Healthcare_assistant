@@ -1,0 +1,6 @@
+{
+  "name": "Hospital Operations AI Assistant",
+  "description": "An executive-level BI dashboard and AI operations analyst for hospital capacities, staffing, and service performance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
