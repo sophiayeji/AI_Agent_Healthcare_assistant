@@ -151,6 +151,23 @@ Analyze department performance, patient satisfaction, length of stay, and monthl
 
 <img width="2774" height="1448" alt="Operational Analytics" src="https://github.com/user-attachments/assets/09467fd7-eedc-4f66-b4a6-d3447b4bee69" />
 
+---
+## 🎥 Project Walkthrough
+
+Watch the complete project demonstration on YouTube:
+
+**▶️ https://www.youtube.com/watch?v=rxN-RHYS5N0**
+
+The walkthrough demonstrates:
+
+- Executive Dashboard
+- Admin Portal
+- CSV Upload Workflow
+- AI Executive Summary
+- Department Performance Analytics
+- Hospital Decision Support
+
+---
 
 # 👩‍💻 Author
 
